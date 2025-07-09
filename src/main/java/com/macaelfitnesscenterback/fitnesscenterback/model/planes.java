@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 /**
  * Entidad JPA que representa un plan de membresía en el sistema.
  * 
@@ -46,7 +50,8 @@ public class planes {
     @Column(name = "imagen")
     private String imagen;
 
-    @ManyToMany(mappedBy = "planes")
+    @OneToMany(mappedBy = "plan")
+    @JsonIgnore
     private Set<Usuarios> usuarios;
 
     // --- Getters y Setters ---
@@ -107,7 +112,7 @@ public class planes {
         return usuarios;
     }
 
-    public void setsuarios(Set<Usuarios> usuarios) {
+    public void setUsuarios(Set<Usuarios> usuarios) {
         this.usuarios = usuarios;
-    } 
+    }
 }

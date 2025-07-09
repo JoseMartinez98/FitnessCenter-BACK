@@ -1,7 +1,8 @@
 package com.macaelfitnesscenterback.fitnesscenterback.model;
 
 import jakarta.persistence.*;
-import java.util.Set;
+
+
 /**
  * Entidad JPA que representa un usuario del sistema.
  * 
@@ -25,14 +26,14 @@ public class Usuarios {
 
     /** Contraseña del usuario (recomendada su encriptación fuera de esta clase). */
     private String password;
-    
-    @ManyToMany
-    @JoinTable(
-        name = "usuarios_planes", // nombre de la tabla unión
-        joinColumns = @JoinColumn(name = "usuario_id"), // FK de esta entidad
-        inverseJoinColumns = @JoinColumn(name = "plan_id") // FK de la otra entidad
-    )
-    private Set<planes> planes;
+    private String altura;
+    private String peso;
+    private String edad;
+    private String objetivoPeso;
+
+    @ManyToOne
+    @JoinColumn(name = "plan_id")
+    private planes plan;
     // --- Getters y Setters ---
 
     public Long getId() {
@@ -67,11 +68,43 @@ public class Usuarios {
         this.password = password;
     }
 
-    public Set<planes> getPlanes() {
-        return planes;
+    public planes getPlan() {
+        return plan;
     }
 
-    public void setPlanes(Set<planes> planes) {
-        this.planes = planes;
-    } 
+    public void setPlan(planes plan) {
+        this.plan = plan;
+    }
+
+    public String getAltura() {
+        return altura;
+    }
+
+    public void setAltura(String altura) {
+        this.altura = altura;
+    }
+
+    public String getPeso() {
+        return peso;
+    }
+
+    public void setPeso(String peso) {
+        this.peso = peso;
+    }
+
+    public String getEdad() {
+        return edad;
+    }
+
+    public void setEdad(String edad) {
+        this.edad = edad;
+    }
+
+    public String getObjetivoPeso() {
+        return objetivoPeso;
+    }
+
+    public void setObjetivoPeso(String objetivoPeso) {
+        this.objetivoPeso = objetivoPeso;
+    }
 }

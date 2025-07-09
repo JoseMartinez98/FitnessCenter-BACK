@@ -3,6 +3,7 @@ package com.macaelfitnesscenterback.fitnesscenterback.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
 
 import com.macaelfitnesscenterback.fitnesscenterback.repository.usuariosRepository;
 import com.macaelfitnesscenterback.fitnesscenterback.security.JwtUtil;
@@ -91,8 +92,9 @@ public class UsuariosController {
      * @param session Sesión HTTP para almacenar usuario autenticado.
      * @return Token JWT y datos del usuario si el login es exitoso; 401 si no lo es.
      */
-@PostMapping("/login")
+@PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
 public ResponseEntity<?> login(@RequestBody Usuarios usuarioRequest) {
+    System.out.println("➡️ Recibida petición de login");
     Optional<Usuarios> usuarioOpt = usuariosRepository.findByEmailAndPassword(
         usuarioRequest.getEmail(),
         usuarioRequest.getPassword()

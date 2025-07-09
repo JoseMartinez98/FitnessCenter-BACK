@@ -7,6 +7,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.security.config.Customizer;
 
 import java.util.List;
 
@@ -32,22 +33,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors()  // Habilita CORS
-            .and()
-            .csrf().disable() // Desactiva protección CSRF (no necesaria para APIs REST sin sesiones)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/usuarios/login",        // Endpoint de login público
-                    "/api/usuarios/registrar",    // Endpoint de registro público
-                    "/api/planes",                // Listado de planes (público)
-                    "/api/planes/**",             // Detalles de planes (público)
-                    "/api/rutinas/",              // Listado de rutinas (público)
-                    "/api/rutinas/**",            // Detalles de rutinas (público)
-                    "/api/noticias/",             // Listado de noticias (público)
-                    "/api/noticias/**"             // Detalles de noticias (público)
-                    ).permitAll()                // Permitir acceso sin autenticación
-                .anyRequest().authenticated()   // Cualquier otro endpoint requiere autenticación
-            );
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/usuarios/login",
+                                "/api/usuarios/registrar",
+                                "/api/planes/**",
+                                "/api/rutinas/**",
+                                "/api/noticias/**",
+                                "/api/favoritos/**")
+                        .permitAll() // Permitir acceso sin autenticación
+                        .anyRequest().authenticated() // Cualquier otro endpoint requiere autenticación
+                );
 
         return http.build(); // Devuelve la cadena de filtros configurada
     }
