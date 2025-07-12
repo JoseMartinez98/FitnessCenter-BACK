@@ -32,6 +32,6 @@ public class NoticiaController {
      */
     @GetMapping("/noticias")
     public List<Noticia> getNoticias() {
-        return noticiaRepository.findAll(); // Recupera todas las noticias sin filtros
+        return noticiaRepository.findAllByOrderByFechaRegistroDesc(); // Recupera todas las noticias sin filtros
     }
 }

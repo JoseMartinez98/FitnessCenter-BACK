@@ -2,6 +2,9 @@ package com.macaelfitnesscenterback.fitnesscenterback.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
@@ -34,6 +37,12 @@ public class UsuariosController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     /**
      * Endpoint POST para registrar un nuevo usuario.
      * 
@@ -46,11 +55,15 @@ public class UsuariosController {
      * @param usuario Objeto con los datos del usuario a registrar.
      * @return 200 si se registra con éxito; 400 si el correo ya existe.
      */
+
     @PostMapping("/registrar")
     public ResponseEntity<String> registrarUsuario(@RequestBody Usuarios usuario) {
         if (usuariosRepository.existsByEmail(usuario.getEmail())) {
             return ResponseEntity.badRequest().body("El correo ya está registrado");
         }
+
+        // Encriptar contraseña antes de guardar
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
         usuariosRepository.save(usuario);
         return ResponseEntity.ok("Usuario registrado correctamente");
@@ -90,38 +103,79 @@ public class UsuariosController {
      *
      * @param usuario Objeto con email y contraseña.
      * @param session Sesión HTTP para almacenar usuario autenticado.
-     * @return Token JWT y datos del usuario si el login es exitoso; 401 si no lo es.
+     * @return Token JWT y datos del usuario si el login es exitoso; 401 si no lo
+     *         es.
      */
-@PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-public ResponseEntity<?> login(@RequestBody Usuarios usuarioRequest) {
-    System.out.println("➡️ Recibida petición de login");
-    Optional<Usuarios> usuarioOpt = usuariosRepository.findByEmailAndPassword(
-        usuarioRequest.getEmail(),
-        usuarioRequest.getPassword()
-    );
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Usuarios usuarioRequest) {
+        Optional<Usuarios> usuarioOpt = usuariosRepository.findByEmail(usuarioRequest.getEmail());
 
-    if (usuarioOpt.isPresent()) {
-        Usuarios usuario = usuarioOpt.get();
+        if (usuarioOpt.isPresent()) {
+            Usuarios usuario = usuarioOpt.get();
 
-        String token = jwtUtil.generateToken(usuario.getEmail());
+            // Verifica que la contraseña sin encriptar coincida con la encriptada
+            if (passwordEncoder.matches(usuarioRequest.getPassword(), usuario.getPassword())) {
+                String token = jwtUtil.generateToken(usuario.getEmail());
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("token", token);
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", token);
 
-        // Devuelve solo información no sensible del usuario
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("id", usuario.getId());
-        userData.put("email", usuario.getEmail());
-        userData.put("nombre", usuario.getNombre());
+                Map<String, Object> userData = new HashMap<>();
+                userData.put("id", usuario.getId());
+                userData.put("email", usuario.getEmail());
+                userData.put("nombre", usuario.getNombre());
 
-        response.put("usuario", userData);
+                response.put("usuario", userData);
 
-        return ResponseEntity.ok(response);
+                return ResponseEntity.ok(response);
+            }
+        }
+
+        return ResponseEntity.status(401).body("Credenciales incorrectas");
     }
 
-    return ResponseEntity.status(401).body("Credenciales incorrectas");
-}
+    @PostMapping("/solicitar-restablecimiento")
+    public ResponseEntity<?> solicitarRestablecimiento(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
 
+        Optional<Usuarios> usuarioOpt = usuariosRepository.findByEmail(email);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Usuario no encontrado");
+        }
+
+        String token = jwtUtil.generateToken(email);
+        String url = "http://localhost:5173/restablecer-contrasena?token=" + token;
+
+        SimpleMailMessage mensaje = new SimpleMailMessage();
+        mensaje.setTo(email);
+        mensaje.setSubject("Restablece tu contraseña");
+        mensaje.setText("Haz clic en el siguiente enlace para restablecer tu contraseña:\n" + url);
+        mailSender.send(mensaje);
+
+        return ResponseEntity.ok("Correo de restablecimiento enviado");
+    }
+
+    @PostMapping("/restablecer-contrasena")
+    public ResponseEntity<?> restablecerContrasena(@RequestBody Map<String, String> payload) {
+        String token = payload.get("token");
+        String nuevaContrasena = payload.get("nuevaContrasena");
+
+        if (!jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(400).body("Token inválido o expirado");
+        }
+
+        String email = jwtUtil.extractEmail(token);
+        Optional<Usuarios> usuarioOpt = usuariosRepository.findByEmail(email);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Usuario no encontrado");
+        }
+
+        Usuarios usuario = usuarioOpt.get();
+        usuario.setPassword(passwordEncoder.encode(nuevaContrasena));
+        usuariosRepository.save(usuario);
+
+        return ResponseEntity.ok("Contraseña restablecida correctamente");
+    }
 
     /**
      * Endpoint POST para cerrar sesión.

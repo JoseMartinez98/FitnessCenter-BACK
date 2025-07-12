@@ -21,6 +21,8 @@ public class Noticia {
     /** Título de la noticia. */
     private String titulo;
 
+    private String contenido;
+
     /** URL o nombre de la imagen asociada a la noticia. */
     private String imagen;
 
@@ -65,5 +67,13 @@ public class Noticia {
 
     public void setFechaRegistro(LocalDateTime fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
+    }
+
+    public String getContenido() {
+        return contenido;
+    }
+
+    public void setContenido(String contenido) {
+        this.contenido = contenido;
     }
 }

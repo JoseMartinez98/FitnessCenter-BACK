@@ -8,6 +8,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.security.config.Customizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -39,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/usuarios/login",
                                 "/api/usuarios/registrar",
+                                "/api/usuarios/solicitar-restablecimiento",
+                                "/api/usuarios/restablecer-contrasena",
                                 "/api/planes/**",
                                 "/api/rutinas/**",
                                 "/api/noticias/**",
@@ -49,7 +55,10 @@ public class SecurityConfig {
 
         return http.build(); // Devuelve la cadena de filtros configurada
     }
-
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
     /**
      * Configura la política de CORS para los endpoints de la API.
      * 
