@@ -12,5 +12,4 @@ public class FitnesscenterbackApplication {
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     	System.out.println(encoder.encode("admin123")); 
 	}
-	
 }
