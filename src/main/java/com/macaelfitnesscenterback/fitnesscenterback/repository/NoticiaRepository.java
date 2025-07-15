@@ -2,8 +2,9 @@ package com.macaelfitnesscenterback.fitnesscenterback.repository;
 
 import com.macaelfitnesscenterback.fitnesscenterback.model.Noticia;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface NoticiaRepository extends JpaRepository<Noticia, Long> {
-        List<Noticia> findAllByOrderByFechaRegistroDesc();
+        Page<Noticia> findAllByOrderByFechaRegistroDesc(Pageable pageable);
 }
