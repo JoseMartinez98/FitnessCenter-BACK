@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.Base64;
 import java.util.Date;
 import java.security.Key;
+import java.util.List;
 
 /**
  * Clase utilitaria para la gestión de tokens JWT (JSON Web Tokens).
@@ -23,14 +24,16 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(decodedKey);
     }
 
-    public String generateToken(String email) {
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24 horas
-                .signWith(key)
-                .compact();
-    }
+public String generateToken(String email, List<String> roles) {
+    return Jwts.builder()
+            .setSubject(email)
+            .claim("roles", roles)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24h
+            .signWith(key)
+            .compact();
+}
+
 
     public String extractEmail(String token) {
         return Jwts.parserBuilder()

@@ -1,6 +1,7 @@
 package com.macaelfitnesscenterback.fitnesscenterback.model;
 
 import jakarta.persistence.*;
+import java.util.Set;
 
 
 /**
@@ -34,6 +35,15 @@ public class Usuarios {
     @ManyToOne
     @JoinColumn(name = "plan_id")
     private planes plan;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "usuario_roles",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "rol_id")
+    )
+    private Set<Rol> roles;
+
     // --- Getters y Setters ---
 
     public Long getId() {
@@ -107,4 +117,13 @@ public class Usuarios {
     public void setObjetivoPeso(String objetivoPeso) {
         this.objetivoPeso = objetivoPeso;
     }
+
+    public Set<Rol> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Rol> roles) {
+        this.roles = roles;
+    }
+    
 }

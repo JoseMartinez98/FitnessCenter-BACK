@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
 import com.macaelfitnesscenterback.fitnesscenterback.repository.usuariosRepository;
+import com.macaelfitnesscenterback.fitnesscenterback.repository.RolRepository;
 import com.macaelfitnesscenterback.fitnesscenterback.security.JwtUtil;
+import com.macaelfitnesscenterback.fitnesscenterback.model.Rol;
 import com.macaelfitnesscenterback.fitnesscenterback.model.Usuarios;
 
 import jakarta.servlet.http.HttpSession;
@@ -17,6 +19,8 @@ import jakarta.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Set;
+import java.util.List;
 
 /**
  * Controlador REST para operaciones de autenticación y gestión de usuarios.
@@ -42,6 +46,8 @@ public class UsuariosController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private RolRepository rolRepository;
 
     /**
      * Endpoint POST para registrar un nuevo usuario.
@@ -62,8 +68,12 @@ public class UsuariosController {
             return ResponseEntity.badRequest().body("El correo ya está registrado");
         }
 
-        // Encriptar contraseña antes de guardar
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+
+        // Asignar rol por defecto
+        Rol rolUser = rolRepository.findByNombre("ROLE_USER")
+                .orElseGet(() -> rolRepository.save(new Rol("ROLE_USER")));
+        usuario.setRoles(Set.of(rolUser));
 
         usuariosRepository.save(usuario);
         return ResponseEntity.ok("Usuario registrado correctamente");
@@ -115,7 +125,8 @@ public class UsuariosController {
 
             // Verifica que la contraseña sin encriptar coincida con la encriptada
             if (passwordEncoder.matches(usuarioRequest.getPassword(), usuario.getPassword())) {
-                String token = jwtUtil.generateToken(usuario.getEmail());
+                String token = jwtUtil.generateToken(usuario.getEmail(),
+                        usuario.getRoles().stream().map(Rol::getNombre).toList());
 
                 Map<String, Object> response = new HashMap<>();
                 response.put("token", token);
@@ -124,6 +135,7 @@ public class UsuariosController {
                 userData.put("id", usuario.getId());
                 userData.put("email", usuario.getEmail());
                 userData.put("nombre", usuario.getNombre());
+                userData.put("roles", usuario.getRoles().stream().map(Rol::getNombre).toArray());
 
                 response.put("usuario", userData);
 
@@ -143,7 +155,7 @@ public class UsuariosController {
             return ResponseEntity.status(404).body("Usuario no encontrado");
         }
 
-        String token = jwtUtil.generateToken(email);
+        String token = jwtUtil.generateToken(email, List.of());
         String url = "http://localhost:5173/restablecer-contrasena?token=" + token;
 
         SimpleMailMessage mensaje = new SimpleMailMessage();
