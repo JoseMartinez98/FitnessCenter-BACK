@@ -34,4 +34,8 @@ public class RutinaController {
     public List<Rutina> getRutinas() {
         return rutinaRepository.findAll(); // Obtiene todas las rutinas disponibles desde la base de datos
     }
-}
+    @DeleteMapping("/rutinas/{id}")
+    public void deleteRutina(@PathVariable Long id) {
+        rutinaRepository.deleteById(id);
+    }
+} 

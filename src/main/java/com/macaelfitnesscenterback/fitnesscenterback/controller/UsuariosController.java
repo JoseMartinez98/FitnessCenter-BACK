@@ -1,12 +1,14 @@
 package com.macaelfitnesscenterback.fitnesscenterback.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.MediaType;
 
 import com.macaelfitnesscenterback.fitnesscenterback.repository.usuariosRepository;
 import com.macaelfitnesscenterback.fitnesscenterback.repository.RolRepository;
@@ -146,26 +148,56 @@ public class UsuariosController {
         return ResponseEntity.status(401).body("Credenciales incorrectas");
     }
 
-    @PostMapping("/solicitar-restablecimiento")
-    public ResponseEntity<?> solicitarRestablecimiento(@RequestBody Map<String, String> payload) {
-        String email = payload.get("email");
+@PostMapping("/solicitar-restablecimiento")
+public ResponseEntity<?> solicitarRestablecimiento(@RequestBody Map<String, String> payload) {
+    String email = payload.get("email");
 
-        Optional<Usuarios> usuarioOpt = usuariosRepository.findByEmail(email);
-        if (usuarioOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("Usuario no encontrado");
-        }
-
-        String token = jwtUtil.generateToken(email, List.of());
-        String url = "http://localhost:5173/restablecer-contrasena?token=" + token;
-
-        SimpleMailMessage mensaje = new SimpleMailMessage();
-        mensaje.setTo(email);
-        mensaje.setSubject("Restablece tu contraseña");
-        mensaje.setText("Haz clic en el siguiente enlace para restablecer tu contraseña:\n" + url);
-        mailSender.send(mensaje);
-
-        return ResponseEntity.ok("Correo de restablecimiento enviado");
+    Optional<Usuarios> usuarioOpt = usuariosRepository.findByEmail(email);
+    if (usuarioOpt.isEmpty()) {
+        return ResponseEntity.status(404).body("Usuario no encontrado");
     }
+
+    String token = jwtUtil.generateToken(email, List.of());
+    String url = "http://localhost:5173/restablecer-contrasena?token=" + token;
+
+    try {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+        helper.setTo(email);
+        helper.setSubject("Restablece tu contraseña");
+
+        String htmlContent = """
+                <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 30px; text-align: center;">
+                    <div style="background-color: white; max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; color: green; font-size: 24px; margin-bottom: 20px;">
+                            <img src='cid:logoImage' style="width: 50px; height: 50px;" />
+                            <p style="margin: 0;">Macael Fitness Center</p>
+                        </div>
+                        <h2 style="color: #333;">Restablecimiento de Contraseña</h2>
+                        <p style="color: #555;">Haz clic en el siguiente botón para restablecer tu contraseña:</p>
+                        <a href="%s" style="display: inline-block; margin-top: 20px; background-color: green; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px;">
+                            Restablecer Contraseña
+                        </a>
+                        <p style="color: #888; margin-top: 20px; font-size: 12px;">Si no solicitaste este correo, puedes ignorarlo.</p>
+                    </div>
+                </div>
+                """.formatted(url);
+
+        helper.setText(htmlContent, true); // true para HTML
+
+        // Añadir imagen embebida (opcional)
+        ClassPathResource logo = new ClassPathResource("static/favicon.ico"); // Ajusta ruta si es diferente
+        helper.addInline("logoImage", logo);
+
+        mailSender.send(mimeMessage);
+        return ResponseEntity.ok("Correo de restablecimiento enviado");
+
+    } catch (MessagingException e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).body("Error al enviar el correo");
+    }
+}
 
     @PostMapping("/restablecer-contrasena")
     public ResponseEntity<?> restablecerContrasena(@RequestBody Map<String, String> payload) {
