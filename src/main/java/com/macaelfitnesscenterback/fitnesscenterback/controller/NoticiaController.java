@@ -14,29 +14,14 @@ import org.springframework.util.StringUtils;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.io.*;
-/**
- * Controlador REST para gestionar operaciones relacionadas con las noticias.
- * 
- * Este controlador expone un endpoint público para obtener el listado de
- * noticias disponibles.
- */
+
 @RestController
 @RequestMapping("/api")
 public class NoticiaController {
 
-    // Inyección del repositorio que accede a la base de datos de noticias
     @Autowired
     private NoticiaRepository noticiaRepository;
 
-    /**
-     * Endpoint GET para obtener todas las noticias registradas en el sistema.
-     *
-     * URL: /api/noticias
-     * Método: GET
-     * Acceso: Público
-     *
-     * @return Lista de objetos Noticia obtenida desde la base de datos.
-     */
     @GetMapping("/noticias")
     public Page<Noticia> getNoticias(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
@@ -47,11 +32,11 @@ public class NoticiaController {
     @DeleteMapping("/noticias/{id}")
     public void deleteNoticia(@PathVariable Long id) {
         noticiaRepository.deleteById(id);
-    }
+    } 
 
     @PostMapping("/subirNoticias")
     public ResponseEntity<Noticia> crearNoticia(@RequestBody Noticia noticia) {
-        noticia.setFechaRegistro(LocalDateTime.now()); // fecha automática
+        noticia.setFechaRegistro(LocalDateTime.now());
         Noticia nueva = noticiaRepository.save(noticia);
         return ResponseEntity.ok(nueva);
     }

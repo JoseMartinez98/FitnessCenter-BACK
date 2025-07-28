@@ -30,13 +30,24 @@ public class SecurityConfig {
                                 "/api/usuarios/solicitar-restablecimiento",
                                 "/api/usuarios/restablecer-contrasena",
                                 "/api/planes/**",
+                                "/api/planes/{id}",
+                                "/api/planes/upload-plan",
+                                "/api/planes/subirPlan",
+                                "/api/planes/editarPlan/{id}",
                                 "/api/rutinas/**",
                                 "/api/noticias/**",
                                 "/api/noticias",
                                 "/api/favoritos/**",
                                 "/api/subirNoticias",
                                 "/api/upload-imagen",
-                                "/images/**")
+                                "/images/**",
+                                "/api/subirRutina",
+                                "/api/upload-rutina",
+                                "/api/horario/**",
+                                "/api/horario/subir-imagen",
+                                "/api/horario/{id}",
+                                "/api/horario/imagen/"
+                                )   
                         .permitAll() // Permitir acceso sin autenticación
                         .anyRequest().authenticated() // Cualquier otro endpoint requiere autenticación
                 );
