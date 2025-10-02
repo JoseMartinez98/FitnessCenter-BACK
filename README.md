@@ -14,8 +14,9 @@ Este proyecto está construido con un enfoque en la arquitectura moderna y las m
 * **Lenguaje:** [Java 17+]
 * **Base de Datos:** [ MySQL / H2]
 * **Persistencia:** Spring Data JPA / Hibernate
-* **Seguridad:** [Spring Security (JWT/OAuth2)] - *Ajustar según se use*
+* **Seguridad:** [Spring Security (JWT/OAuth2)]  
 * **Build Tool:** Maven
+* **Tests:** Unit  
 
 ## ✨ Características (Endpoints Principales)
 
