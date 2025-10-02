@@ -51,9 +51,9 @@ Ejemplo (application.properties con MySQL):
 
 Properties
 
-spring.datasource.url=jdbc:mysql://localhost:5432/[nombre_de_tu_db].
-spring.datasource.username=[tu_usuario_db].
-spring.datasource.password=[tu_contraseña_db].
-spring.jpa.hibernate.ddl-auto=update.
+spring.datasource.url=jdbc:mysql://localhost:5432/[nombre_de_tu_db]  
+spring.datasource.username=[tu_usuario_db]  
+spring.datasource.password=[tu_contraseña_db]  
+spring.jpa.hibernate.ddl-auto=update  
 ¡IMPORTANTE! : Usando Spring Security o JWT, recuerda configurar las claves secretas en este archivo.
 
