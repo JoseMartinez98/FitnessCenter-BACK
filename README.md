@@ -41,11 +41,10 @@ Sigue estos pasos para tener una copia del proyecto funcionando localmente:
 
 ### 1. Clonar el Repositorio
 
-```bash
 git clone [https://github.com/JoseMartinez98/FitnessCenter-BACK.git](https://github.com/JoseMartinez98/FitnessCenter-BACK.git)
 cd FitnessCenter-BACK
 
-Configurar la Base de Datos
+### 2. Configurar la Base de Datos
 Crea un archivo llamado application.properties o application.yml en la carpeta src/main/resources/ (si no existe) y configura la conexión a tu base de datos.
 
 Ejemplo (application.properties con MySQL):
@@ -57,5 +56,5 @@ spring.datasource.username=[tu_usuario_db]
 spring.datasource.password=[tu_contraseña_db]
 spring.jpa.hibernate.ddl-auto=update
 ¡IMPORTANTE! : Usando
- Spring Security o JWT, recuerda configurar las claves secretas en este archivo.
+Spring Security o JWT, recuerda configurar las claves secretas en este archivo.
 
