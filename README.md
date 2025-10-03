@@ -16,7 +16,7 @@ Este proyecto está construido con un enfoque en la arquitectura moderna y las m
 * **Persistencia:** Spring Data JPA / Hibernate
 * **Seguridad:** [Spring Security (JWT/OAuth2)]  
 * **Build Tool:** Maven
-* **Tests:** Unit  
+* **Tests:** JUnit  
 
 ## ✨ Características (Endpoints Principales)
 
